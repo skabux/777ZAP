@@ -4,73 +4,80 @@
 <title>777ZAP</title>
 
 <style>
-body{
-    margin:0;
-    font-family:Arial;
-    background:#fff3a3;
+*{
+box-sizing:border-box;
+font-family:Arial;
 }
 
-#login,#chat{
-    width:360px;
-    margin:40px auto;
-    background:white;
-    border-radius:15px;
-    overflow:hidden;
-    box-shadow:0 0 15px #999;
+body{
+margin:0;
+background:#e6e6e6;
+}
+
+.app{
+width:390px;
+max-width:95%;
+margin:30px auto;
+background:white;
+border-radius:15px;
+overflow:hidden;
+box-shadow:0 5px 20px #888;
 }
 
 .top{
-    background:#ffd900;
-    padding:20px;
-    font-size:25px;
-    font-weight:bold;
-    text-align:center;
+background:#f5c400;
+padding:20px;
+text-align:center;
+font-size:28px;
+font-weight:bold;
 }
 
 .box{
-    padding:20px;
+padding:15px;
 }
 
 input,button{
-    width:100%;
-    padding:12px;
-    margin:6px 0;
-    border-radius:8px;
-    border:1px solid #ccc;
+width:100%;
+padding:12px;
+margin:6px 0;
+border-radius:10px;
+border:1px solid #ccc;
 }
 
 button{
-    background:#ffd900;
-    border:0;
-    font-weight:bold;
-    cursor:pointer;
+background:#f5c400;
+border:0;
+font-weight:bold;
+cursor:pointer;
 }
 
 #chat{
-    display:none;
+display:none;
 }
 
-#msgs{
-    height:350px;
-    overflow:auto;
-    background:#fff8d1;
-    padding:10px;
+#mensagens{
+height:350px;
+overflow:auto;
+background:#f7f7f7;
+padding:10px;
 }
 
 .msg{
-    background:white;
-    padding:10px;
-    margin:8px;
-    border-radius:10px;
+background:white;
+margin:8px 0;
+padding:10px;
+border-radius:12px;
+box-shadow:0 2px 5px #ddd;
+}
+
+.nome{
+font-weight:bold;
+color:#b08a00;
 }
 
 img{
-    max-width:180px;
-    border-radius:10px;
-}
-
-.eu{
-    border-left:5px solid #ffd900;
+max-width:200px;
+border-radius:10px;
 }
 </style>
 
@@ -79,15 +86,15 @@ img{
 <body>
 
 
-<div id="login">
+<div class="app" id="login">
 
 <div class="top">
-💛 777ZAP
+777ZAP
 </div>
 
 <div class="box">
 
-<input id="nome" placeholder="Nome">
+<input id="usuario" placeholder="Nome">
 
 <input id="senha" type="password" placeholder="Senha">
 
@@ -101,27 +108,33 @@ img{
 
 
 
-<div id="chat">
+
+<div class="app" id="chat">
 
 <div class="top">
-💬 Plano777
+Plano777
 </div>
 
 
-<div id="msgs"></div>
+<div id="mensagens"></div>
 
 
 <div class="box">
 
-<input id="texto" placeholder="Mensagem">
+<input id="texto" placeholder="Digite uma mensagem">
 
 <button onclick="enviar()">Enviar</button>
 
+
 <input type="file" id="foto" accept="image/*">
 
-<button onclick="mandarFoto()">Enviar foto</button>
+<button onclick="enviarFoto()">Enviar foto</button>
 
-<button onclick="novaConversa()">🗑️ Apagar conversa antiga</button>
+
+<button onclick="baixar()">Baixar conversa</button>
+
+
+<button onclick="apagar()">Apagar conversa antiga</button>
 
 </div>
 
@@ -131,59 +144,76 @@ img{
 
 <script>
 
+
 let contas={
-"Lorenzo":"Lorenzo777",
-"Izaque":"Izaque777"
+lorenzo:"lorenzo777",
+izaque:"izaque777"
 };
 
-let usuario="";
+
+let usuarioAtual="";
+
 
 
 function entrar(){
 
-let n=document.getElementById("nome").value;
-let s=document.getElementById("senha").value;
+let nome=document.getElementById("usuario").value.toLowerCase();
+
+let senha=document.getElementById("senha").value.toLowerCase();
 
 
-if(contas[n]===s){
+if(contas[nome]==senha){
 
-usuario=n;
 
-login.style.display="none";
-chat.style.display="block";
+usuarioAtual=nome;
+
+
+document.getElementById("login").style.display="none";
+
+document.getElementById("chat").style.display="block";
+
 
 carregar();
 
+
 }else{
 
-erro.innerHTML="Login inválido";
+erro.innerHTML="Login incorreto";
 
 }
 
 }
+
 
 
 
 function enviar(){
 
-let t=texto.value;
+let texto=document.getElementById("texto").value;
 
-if(t=="")return;
+
+if(texto=="") return;
 
 
 let lista=JSON.parse(localStorage.getItem("plano777")||"[]");
 
 
 lista.push({
-nome:usuario,
-texto:t,
-tipo:"msg"
+
+nome:usuarioAtual,
+
+texto:texto,
+
+tipo:"texto"
+
 });
 
 
 localStorage.setItem("plano777",JSON.stringify(lista));
 
-texto.value="";
+
+document.getElementById("texto").value="";
+
 
 carregar();
 
@@ -191,9 +221,11 @@ carregar();
 
 
 
-function mandarFoto(){
 
-let arquivo=foto.files[0];
+function enviarFoto(){
+
+let arquivo=document.getElementById("foto").files[0];
+
 
 if(!arquivo)return;
 
@@ -203,13 +235,18 @@ let leitor=new FileReader();
 
 leitor.onload=function(){
 
+
 let lista=JSON.parse(localStorage.getItem("plano777")||"[]");
 
 
 lista.push({
-nome:usuario,
+
+nome:usuarioAtual,
+
 texto:leitor.result,
+
 tipo:"foto"
+
 });
 
 
@@ -218,7 +255,8 @@ localStorage.setItem("plano777",JSON.stringify(lista));
 
 carregar();
 
-}
+
+};
 
 
 leitor.readAsDataURL(arquivo);
@@ -230,7 +268,11 @@ leitor.readAsDataURL(arquivo);
 
 function carregar(){
 
-msgs.innerHTML="";
+
+let caixa=document.getElementById("mensagens");
+
+
+caixa.innerHTML="";
 
 
 let lista=JSON.parse(localStorage.getItem("plano777")||"[]");
@@ -241,18 +283,27 @@ lista.forEach(m=>{
 
 if(m.tipo=="foto"){
 
-msgs.innerHTML+=`
+
+caixa.innerHTML+=`
+
 <div class="msg">
-<b>${m.nome}</b><br>
+<div class="nome">${m.nome}</div>
 <img src="${m.texto}">
-</div>`;
+</div>
+
+`;
 
 }else{
 
-msgs.innerHTML+=`
+
+caixa.innerHTML+=`
+
 <div class="msg">
-<b>${m.nome}</b>: ${m.texto}
-</div>`;
+<div class="nome">${m.nome}</div>
+${m.texto}
+</div>
+
+`;
 
 }
 
@@ -260,15 +311,73 @@ msgs.innerHTML+=`
 });
 
 
-msgs.scrollTop=msgs.scrollHeight;
+caixa.scrollTop=caixa.scrollHeight;
+
 
 }
 
 
 
-function novaConversa(){
 
-if(confirm("Apagar conversa antiga?")){
+function baixar(){
+
+
+let confirmar=confirm("Deseja baixar a conversa do Plano777?");
+
+
+if(!confirmar)return;
+
+
+let lista=JSON.parse(localStorage.getItem("plano777")||"[]");
+
+
+let texto="Plano777 - 777ZAP\n\n";
+
+
+lista.forEach(m=>{
+
+
+if(m.tipo=="texto"){
+
+texto+=m.nome+": "+m.texto+"\n";
+
+}else{
+
+texto+=m.nome+": [Foto]\n";
+
+}
+
+
+});
+
+
+let arquivo=new Blob([texto],{type:"text/plain"});
+
+
+let link=document.createElement("a");
+
+
+link.href=URL.createObjectURL(arquivo);
+
+
+link.download="Plano777.txt";
+
+
+link.click();
+
+
+}
+
+
+
+
+function apagar(){
+
+
+let confirmar=confirm("Apagar toda a conversa antiga?");
+
+
+if(confirmar){
 
 localStorage.removeItem("plano777");
 
@@ -276,7 +385,9 @@ carregar();
 
 }
 
+
 }
+
 
 </script>
 
