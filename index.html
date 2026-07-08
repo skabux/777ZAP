@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>777ZAP</title>
+
+<style>
+body{
+    margin:0;
+    font-family:Arial;
+    background:#fff3a3;
+}
+
+#login,#chat{
+    width:360px;
+    margin:40px auto;
+    background:white;
+    border-radius:15px;
+    overflow:hidden;
+    box-shadow:0 0 15px #999;
+}
+
+.top{
+    background:#ffd900;
+    padding:20px;
+    font-size:25px;
+    font-weight:bold;
+    text-align:center;
+}
+
+.box{
+    padding:20px;
+}
+
+input,button{
+    width:100%;
+    padding:12px;
+    margin:6px 0;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+
+button{
+    background:#ffd900;
+    border:0;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+#chat{
+    display:none;
+}
+
+#msgs{
+    height:350px;
+    overflow:auto;
+    background:#fff8d1;
+    padding:10px;
+}
+
+.msg{
+    background:white;
+    padding:10px;
+    margin:8px;
+    border-radius:10px;
+}
+
+img{
+    max-width:180px;
+    border-radius:10px;
+}
+
+.eu{
+    border-left:5px solid #ffd900;
+}
+</style>
+
+</head>
+
+<body>
+
+
+<div id="login">
+
+<div class="top">
+💛 777ZAP
+</div>
+
+<div class="box">
+
+<input id="nome" placeholder="Nome">
+
+<input id="senha" type="password" placeholder="Senha">
+
+<button onclick="entrar()">Entrar</button>
+
+<p id="erro"></p>
+
+</div>
+
+</div>
+
+
+
+<div id="chat">
+
+<div class="top">
+💬 Plano777
+</div>
+
+
+<div id="msgs"></div>
+
+
+<div class="box">
+
+<input id="texto" placeholder="Mensagem">
+
+<button onclick="enviar()">Enviar</button>
+
+<input type="file" id="foto" accept="image/*">
+
+<button onclick="mandarFoto()">Enviar foto</button>
+
+<button onclick="novaConversa()">🗑️ Apagar conversa antiga</button>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+let contas={
+"Lorenzo":"Lorenzo777",
+"Izaque":"Izaque777"
+};
+
+let usuario="";
+
+
+function entrar(){
+
+let n=document.getElementById("nome").value;
+let s=document.getElementById("senha").value;
+
+
+if(contas[n]===s){
+
+usuario=n;
+
+login.style.display="none";
+chat.style.display="block";
+
+carregar();
+
+}else{
+
+erro.innerHTML="Login inválido";
+
+}
+
+}
+
+
+
+function enviar(){
+
+let t=texto.value;
+
+if(t=="")return;
+
+
+let lista=JSON.parse(localStorage.getItem("plano777")||"[]");
+
+
+lista.push({
+nome:usuario,
+texto:t,
+tipo:"msg"
+});
+
+
+localStorage.setItem("plano777",JSON.stringify(lista));
+
+texto.value="";
+
+carregar();
+
+}
+
+
+
+function mandarFoto(){
+
+let arquivo=foto.files[0];
+
+if(!arquivo)return;
+
+
+let leitor=new FileReader();
+
+
+leitor.onload=function(){
+
+let lista=JSON.parse(localStorage.getItem("plano777")||"[]");
+
+
+lista.push({
+nome:usuario,
+texto:leitor.result,
+tipo:"foto"
+});
+
+
+localStorage.setItem("plano777",JSON.stringify(lista));
+
+
+carregar();
+
+}
+
+
+leitor.readAsDataURL(arquivo);
+
+}
+
+
+
+
+function carregar(){
+
+msgs.innerHTML="";
+
+
+let lista=JSON.parse(localStorage.getItem("plano777")||"[]");
+
+
+lista.forEach(m=>{
+
+
+if(m.tipo=="foto"){
+
+msgs.innerHTML+=`
+<div class="msg">
+<b>${m.nome}</b><br>
+<img src="${m.texto}">
+</div>`;
+
+}else{
+
+msgs.innerHTML+=`
+<div class="msg">
+<b>${m.nome}</b>: ${m.texto}
+</div>`;
+
+}
+
+
+});
+
+
+msgs.scrollTop=msgs.scrollHeight;
+
+}
+
+
+
+function novaConversa(){
+
+if(confirm("Apagar conversa antiga?")){
+
+localStorage.removeItem("plano777");
+
+carregar();
+
+}
+
+}
+
+</script>
+
+
+</body>
+</html>
