@@ -22,7 +22,6 @@ background:white;
 border-radius:15px;
 overflow:hidden;
 box-shadow:0 5px 15px #777;
-box-sizing:border-box;
 }
 
 .top{
@@ -35,27 +34,22 @@ font-weight:bold;
 
 .box{
 padding:15px;
-box-sizing:border-box;
 }
 
 input,button{
-
 width:100%;
 box-sizing:border-box;
 padding:12px;
-margin:6px 0;
+margin:5px 0;
 border-radius:10px;
 border:1px solid #ccc;
 font-size:16px;
-
 }
 
 button{
-
 background:#f5c400;
 border:0;
 font-weight:bold;
-
 }
 
 #chat{
@@ -63,37 +57,45 @@ display:none;
 }
 
 #mensagens{
-
 height:350px;
 overflow:auto;
 padding:10px;
 background:#f7f7f7;
-
 }
 
 .msg{
-
 background:white;
 padding:10px;
 margin:8px;
 border-radius:12px;
 box-shadow:0 2px 5px #ccc;
-word-wrap:break-word;
 
+word-wrap:break-word;
+overflow-wrap:break-word;
+white-space:pre-wrap;
+}
+
+.perfil{
+display:flex;
+align-items:center;
+gap:10px;
+}
+
+.perfil img{
+width:40px;
+height:40px;
+border-radius:50%;
+object-fit:cover;
 }
 
 .nome{
-
 font-weight:bold;
 color:#b28b00;
-
 }
 
-img{
-
+.msg img{
 max-width:100%;
 border-radius:10px;
-
 }
 
 </style>
@@ -128,6 +130,7 @@ border-radius:10px;
 
 
 
+
 <div class="app" id="chat">
 
 
@@ -141,11 +144,12 @@ Plano777
 
 <div class="box">
 
-
 <input id="texto" placeholder="Mensagem">
 
 
-<button onclick="enviar()">Enviar</button>
+<button onclick="enviar()">
+Enviar
+</button>
 
 
 <input id="foto" type="file" accept="image/*">
@@ -156,14 +160,31 @@ Enviar foto
 </button>
 
 
-<button onclick="baixar()">
-Baixar conversa
+<button onclick="abrirConfig()">
+⚙️ Alterar conta
 </button>
 
 
 <button onclick="apagar()">
 Apagar conversa inteira
 </button>
+
+
+<div id="config" style="display:none">
+
+<h3>Alterar conta</h3>
+
+<input id="novoNome" placeholder="Novo nome">
+
+<input id="novaSenha" placeholder="Nova senha">
+
+<input id="novaFoto" type="file" accept="image/*">
+
+<button onclick="salvarConta()">
+Salvar alterações
+</button>
+
+</div>
 
 
 </div>
@@ -177,31 +198,41 @@ Apagar conversa inteira
 <script>
 
 
-let contas={
+let contas=JSON.parse(localStorage.contas777 || "{}");
 
-"lorenzo":"lorenzo777",
 
-"izaque":"izaque777"
+if(Object.keys(contas).length==0){
+
+contas={
+
+"lorenzo":{
+senha:"lorenzo777",
+foto:"https://cdn-icons-png.flaticon.com/512/149/149071.png"
+},
+
+"izaque":{
+senha:"izaque777",
+foto:"https://cdn-icons-png.flaticon.com/512/149/149071.png"
+}
 
 };
 
+localStorage.contas777=JSON.stringify(contas);
+
+}
+
 
 let usuarioAtual="";
-
-
-
-
 function entrar(){
 
-
 let nome=document.getElementById("usuario").value.toLowerCase();
-
-let senha=document.getElementById("senha").value.toLowerCase();
-
+let senha=document.getElementById("senha").value;
 
 
-if(contas[nome]==senha){
+let contas=JSON.parse(localStorage.contas777 || "{}");
 
+
+if(contas[nome] && contas[nome].senha == senha){
 
 usuarioAtual=nome;
 
@@ -216,46 +247,37 @@ carregar();
 
 }else{
 
-
 document.getElementById("erro").innerHTML="Login errado";
 
-
 }
 
-
 }
-
 
 
 
 function enviar(){
 
-
-let t=document.getElementById("texto").value;
-
-
-if(!t)return;
+let texto=document.getElementById("texto").value;
 
 
+if(!texto)return;
 
-let lista=JSON.parse(localStorage.plano777||"[]");
 
+let lista=JSON.parse(localStorage.plano777 || "[]");
 
 
 lista.push({
 
 nome:usuarioAtual,
 
-texto:t,
+texto:texto,
 
 tipo:"texto"
 
 });
 
 
-
 localStorage.plano777=JSON.stringify(lista);
-
 
 
 document.getElementById("texto").value="";
@@ -263,32 +285,26 @@ document.getElementById("texto").value="";
 
 carregar();
 
-
 }
-
 
 
 
 
 function enviarFoto(){
 
+let arquivo=document.getElementById("foto").files[0];
 
-let arq=document.getElementById("foto").files[0];
 
-
-if(!arq)return;
-
+if(!arquivo)return;
 
 
 let leitor=new FileReader();
 
 
-
 leitor.onload=function(){
 
 
-let lista=JSON.parse(localStorage.plano777||"[]");
-
+let lista=JSON.parse(localStorage.plano777 || "[]");
 
 
 lista.push({
@@ -302,9 +318,7 @@ tipo:"foto"
 });
 
 
-
 localStorage.plano777=JSON.stringify(lista);
-
 
 
 carregar();
@@ -313,9 +327,7 @@ carregar();
 };
 
 
-
-leitor.readAsDataURL(arq);
-
+leitor.readAsDataURL(arquivo);
 
 
 }
@@ -329,34 +341,29 @@ function carregar(){
 
 let div=document.getElementById("mensagens");
 
-
 div.innerHTML="";
 
 
+let lista=JSON.parse(localStorage.plano777 || "[]");
 
-let lista=JSON.parse(localStorage.plano777||"[]");
+let contas=JSON.parse(localStorage.contas777 || "{}");
 
 
 
 lista.forEach((m,i)=>{
 
 
-
 let apagar="";
 
 
-
 if(m.nome==usuarioAtual){
-
 
 apagar=`
 
 <br>
 
 <button onclick="deletar(${i})">
-
 Deletar
-
 </button>
 
 `;
@@ -365,49 +372,55 @@ Deletar
 
 
 
-if(m.tipo=="foto"){
+let foto=contas[m.nome]?.foto || 
+"https://cdn-icons-png.flaticon.com/512/149/149071.png";
 
+
+
+if(m.tipo=="foto"){
 
 
 div.innerHTML+=`
 
 <div class="msg">
 
-<div class="nome">
+<div class="perfil">
 
-${m.nome}
+<img src="${foto}">
+
+<div class="nome">${m.nome}</div>
 
 </div>
 
+<br>
 
 <img src="${m.texto}">
-
 
 ${apagar}
 
 </div>
 
 `;
-
 
 
 }else{
 
 
-
 div.innerHTML+=`
 
 <div class="msg">
 
-<div class="nome">
+<div class="perfil">
 
-${m.nome}
+<img src="${foto}">
+
+<div class="nome">${m.nome}</div>
 
 </div>
 
+<br>
 
 ${m.texto}
-
 
 ${apagar}
 
@@ -416,9 +429,7 @@ ${apagar}
 `;
 
 
-
 }
-
 
 
 });
@@ -433,9 +444,7 @@ ${apagar}
 function deletar(i){
 
 
-
-let lista=JSON.parse(localStorage.plano777||"[]");
-
+let lista=JSON.parse(localStorage.plano777 || "[]");
 
 
 if(lista[i].nome!=usuarioAtual){
@@ -445,7 +454,6 @@ alert("Você só pode apagar suas mensagens!");
 return;
 
 }
-
 
 
 if(confirm("Deletar mensagem?")){
@@ -463,6 +471,64 @@ carregar();
 }
 
 
+}
+
+
+
+
+
+function abrirConfig(){
+
+document.getElementById("config").style.display="block";
+
+}
+
+
+
+
+function salvarConta(){
+
+
+let novoNome=document.getElementById("novoNome").value.toLowerCase();
+
+let novaSenha=document.getElementById("novaSenha").value;
+
+
+if(!novoNome || !novaSenha){
+
+alert("Preencha nome e senha");
+
+return;
+
+}
+
+
+let contas=JSON.parse(localStorage.contas777 || "{}");
+
+
+contas[novoNome]={
+
+senha:novaSenha,
+
+foto:contas[usuarioAtual].foto
+
+};
+
+
+delete contas[usuarioAtual];
+
+
+usuarioAtual=novoNome;
+
+
+localStorage.contas777=JSON.stringify(contas);
+
+
+alert("Conta alterada!");
+
+
+carregar();
+
 
 }
 
@@ -470,8 +536,47 @@ carregar();
 
 
 
-function apagar(){
+document.getElementById("novaFoto").addEventListener("change",function(){
 
+
+let arquivo=this.files[0];
+
+
+if(!arquivo)return;
+
+
+let leitor=new FileReader();
+
+
+leitor.onload=function(){
+
+
+let contas=JSON.parse(localStorage.contas777 || "{}");
+
+
+contas[usuarioAtual].foto=leitor.result;
+
+
+localStorage.contas777=JSON.stringify(contas);
+
+
+carregar();
+
+
+};
+
+
+leitor.readAsDataURL(arquivo);
+
+
+});
+
+
+
+
+
+
+function apagar(){
 
 
 if(confirm("Apagar toda conversa?")){
@@ -484,68 +589,6 @@ carregar();
 
 
 }
-
-
-}
-
-
-
-
-
-function baixar(){
-
-
-
-let lista=JSON.parse(localStorage.plano777||"[]");
-
-
-
-let arquivo="Plano777 - 777ZAP\n\n";
-
-
-
-lista.forEach(m=>{
-
-
-arquivo+=m.nome+": ";
-
-
-
-if(m.tipo=="foto"){
-
-arquivo+="[Foto]\n";
-
-}else{
-
-arquivo+=m.texto+"\n";
-
-}
-
-
-
-});
-
-
-
-let blob=new Blob([arquivo],{
-
-type:"text/plain"
-
-});
-
-
-
-let link=document.createElement("a");
-
-
-link.href=URL.createObjectURL(blob);
-
-
-link.download="Plano777.txt";
-
-
-link.click();
-
 
 
 }
