@@ -119,14 +119,15 @@ border-radius:10px;
 
 <input id="senha" type="password" placeholder="Senha">
 
-<button onclick="entrar()">Entrar</button>
+<button onclick="entrar()">
+Entrar
+</button>
 
 <p id="erro"></p>
 
 </div>
 
 </div>
-
 
 
 
@@ -144,6 +145,7 @@ Plano777
 
 <div class="box">
 
+
 <input id="texto" placeholder="Mensagem">
 
 
@@ -160,31 +162,9 @@ Enviar foto
 </button>
 
 
-<button onclick="abrirConfig()">
-⚙️ Alterar conta
-</button>
-
-
 <button onclick="apagar()">
 Apagar conversa inteira
 </button>
-
-
-<div id="config" style="display:none">
-
-<h3>Alterar conta</h3>
-
-<input id="novoNome" placeholder="Novo nome">
-
-<input id="novaSenha" placeholder="Nova senha">
-
-<input id="novaFoto" type="file" accept="image/*">
-
-<button onclick="salvarConta()">
-Salvar alterações
-</button>
-
-</div>
 
 
 </div>
@@ -198,41 +178,40 @@ Salvar alterações
 <script>
 
 
-let contas=JSON.parse(localStorage.contas777 || "{}");
-
-
-if(Object.keys(contas).length==0){
-
-contas={
+let contas={
 
 "lorenzo":{
+
 senha:"lorenzo777",
+
 foto:"https://cdn-icons-png.flaticon.com/512/149/149071.png"
+
 },
 
+
 "izaque":{
+
 senha:"izaque777",
+
 foto:"https://cdn-icons-png.flaticon.com/512/149/149071.png"
+
 }
 
 };
 
-localStorage.contas777=JSON.stringify(contas);
-
-}
-
 
 let usuarioAtual="";
+
+
 function entrar(){
 
 let nome=document.getElementById("usuario").value.toLowerCase();
+
 let senha=document.getElementById("senha").value;
 
 
-let contas=JSON.parse(localStorage.contas777 || "{}");
+if(contas[nome] && contas[nome].senha==senha){
 
-
-if(contas[nome] && contas[nome].senha == senha){
 
 usuarioAtual=nome;
 
@@ -247,20 +226,20 @@ carregar();
 
 }else{
 
+
 document.getElementById("erro").innerHTML="Login errado";
 
-}
 
 }
 
 
-
+}
 function enviar(){
 
-let texto=document.getElementById("texto").value;
+let t=document.getElementById("texto").value;
 
 
-if(!texto)return;
+if(!t)return;
 
 
 let lista=JSON.parse(localStorage.plano777 || "[]");
@@ -270,7 +249,7 @@ lista.push({
 
 nome:usuarioAtual,
 
-texto:texto,
+texto:t,
 
 tipo:"texto"
 
@@ -286,6 +265,7 @@ document.getElementById("texto").value="";
 carregar();
 
 }
+
 
 
 
@@ -341,29 +321,31 @@ function carregar(){
 
 let div=document.getElementById("mensagens");
 
+
 div.innerHTML="";
 
 
 let lista=JSON.parse(localStorage.plano777 || "[]");
-
-let contas=JSON.parse(localStorage.contas777 || "{}");
 
 
 
 lista.forEach((m,i)=>{
 
 
-let apagar="";
+let botao="";
 
 
 if(m.nome==usuarioAtual){
 
-apagar=`
+
+botao=`
 
 <br>
 
 <button onclick="deletar(${i})">
+
 Deletar
+
 </button>
 
 `;
@@ -372,8 +354,7 @@ Deletar
 
 
 
-let foto=contas[m.nome]?.foto || 
-"https://cdn-icons-png.flaticon.com/512/149/149071.png";
+let foto=contas[m.nome].foto;
 
 
 
@@ -384,19 +365,31 @@ div.innerHTML+=`
 
 <div class="msg">
 
+
 <div class="perfil">
+
 
 <img src="${foto}">
 
-<div class="nome">${m.nome}</div>
+
+<div class="nome">
+
+${m.nome}
 
 </div>
 
+
+</div>
+
+
 <br>
+
 
 <img src="${m.texto}">
 
-${apagar}
+
+${botao}
+
 
 </div>
 
@@ -410,24 +403,35 @@ div.innerHTML+=`
 
 <div class="msg">
 
+
 <div class="perfil">
+
 
 <img src="${foto}">
 
-<div class="nome">${m.nome}</div>
+
+<div class="nome">
+
+${m.nome}
 
 </div>
 
+
+</div>
+
+
 <br>
+
 
 ${m.texto}
 
-${apagar}
+
+${botao}
+
 
 </div>
 
 `;
-
 
 }
 
@@ -447,6 +451,7 @@ function deletar(i){
 let lista=JSON.parse(localStorage.plano777 || "[]");
 
 
+
 if(lista[i].nome!=usuarioAtual){
 
 alert("Você só pode apagar suas mensagens!");
@@ -454,6 +459,7 @@ alert("Você só pode apagar suas mensagens!");
 return;
 
 }
+
 
 
 if(confirm("Deletar mensagem?")){
@@ -472,105 +478,6 @@ carregar();
 
 
 }
-
-
-
-
-
-function abrirConfig(){
-
-document.getElementById("config").style.display="block";
-
-}
-
-
-
-
-function salvarConta(){
-
-
-let novoNome=document.getElementById("novoNome").value.toLowerCase();
-
-let novaSenha=document.getElementById("novaSenha").value;
-
-
-if(!novoNome || !novaSenha){
-
-alert("Preencha nome e senha");
-
-return;
-
-}
-
-
-let contas=JSON.parse(localStorage.contas777 || "{}");
-
-
-contas[novoNome]={
-
-senha:novaSenha,
-
-foto:contas[usuarioAtual].foto
-
-};
-
-
-delete contas[usuarioAtual];
-
-
-usuarioAtual=novoNome;
-
-
-localStorage.contas777=JSON.stringify(contas);
-
-
-alert("Conta alterada!");
-
-
-carregar();
-
-
-}
-
-
-
-
-
-document.getElementById("novaFoto").addEventListener("change",function(){
-
-
-let arquivo=this.files[0];
-
-
-if(!arquivo)return;
-
-
-let leitor=new FileReader();
-
-
-leitor.onload=function(){
-
-
-let contas=JSON.parse(localStorage.contas777 || "{}");
-
-
-contas[usuarioAtual].foto=leitor.result;
-
-
-localStorage.contas777=JSON.stringify(contas);
-
-
-carregar();
-
-
-};
-
-
-leitor.readAsDataURL(arquivo);
-
-
-});
-
 
 
 
