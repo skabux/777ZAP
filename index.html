@@ -4,14 +4,10 @@
 <title>777ZAP</title>
 
 <style>
-*{
-box-sizing:border-box;
-font-family:Arial;
-}
-
 body{
 margin:0;
-background:#e6e6e6;
+font-family:Arial;
+background:#ddd;
 }
 
 .app{
@@ -21,7 +17,7 @@ margin:30px auto;
 background:white;
 border-radius:15px;
 overflow:hidden;
-box-shadow:0 5px 20px #888;
+box-shadow:0 5px 15px #777;
 }
 
 .top{
@@ -39,7 +35,7 @@ padding:15px;
 input,button{
 width:100%;
 padding:12px;
-margin:6px 0;
+margin:5px 0;
 border-radius:10px;
 border:1px solid #ccc;
 }
@@ -48,7 +44,6 @@ button{
 background:#f5c400;
 border:0;
 font-weight:bold;
-cursor:pointer;
 }
 
 #chat{
@@ -58,25 +53,25 @@ display:none;
 #mensagens{
 height:350px;
 overflow:auto;
-background:#f7f7f7;
 padding:10px;
+background:#f7f7f7;
 }
 
 .msg{
 background:white;
-margin:8px 0;
 padding:10px;
+margin:8px;
 border-radius:12px;
-box-shadow:0 2px 5px #ddd;
+box-shadow:0 2px 5px #ccc;
 }
 
 .nome{
 font-weight:bold;
-color:#b08a00;
+color:#b28b00;
 }
 
 img{
-max-width:200px;
+max-width:180px;
 border-radius:10px;
 }
 </style>
@@ -103,9 +98,7 @@ border-radius:10px;
 <p id="erro"></p>
 
 </div>
-
 </div>
-
 
 
 
@@ -115,26 +108,21 @@ border-radius:10px;
 Plano777
 </div>
 
-
 <div id="mensagens"></div>
-
 
 <div class="box">
 
-<input id="texto" placeholder="Digite uma mensagem">
+<input id="texto" placeholder="Mensagem">
 
 <button onclick="enviar()">Enviar</button>
 
-
-<input type="file" id="foto" accept="image/*">
+<input id="foto" type="file" accept="image/*">
 
 <button onclick="enviarFoto()">Enviar foto</button>
 
-
 <button onclick="baixar()">Baixar conversa</button>
 
-
-<button onclick="apagar()">Apagar conversa antiga</button>
+<button onclick="apagar()">Apagar conversa inteira</button>
 
 </div>
 
@@ -144,76 +132,59 @@ Plano777
 
 <script>
 
-
 let contas={
-lorenzo:"lorenzo777",
-izaque:"izaque777"
+"lorenzo":"lorenzo777",
+"izaque":"izaque777"
 };
 
-
 let usuarioAtual="";
-
 
 
 function entrar(){
 
 let nome=document.getElementById("usuario").value.toLowerCase();
-
 let senha=document.getElementById("senha").value.toLowerCase();
 
 
 if(contas[nome]==senha){
 
-
 usuarioAtual=nome;
 
-
-document.getElementById("login").style.display="none";
-
-document.getElementById("chat").style.display="block";
-
+login.style.display="none";
+chat.style.display="block";
 
 carregar();
 
-
 }else{
 
-erro.innerHTML="Login incorreto";
+erro.innerHTML="Login errado";
 
 }
 
 }
-
 
 
 
 function enviar(){
 
-let texto=document.getElementById("texto").value;
+let t=texto.value;
+
+if(!t)return;
 
 
-if(texto=="") return;
-
-
-let lista=JSON.parse(localStorage.getItem("plano777")||"[]");
+let lista=JSON.parse(localStorage.plano777||"[]");
 
 
 lista.push({
-
 nome:usuarioAtual,
-
-texto:texto,
-
+texto:t,
 tipo:"texto"
-
 });
 
 
-localStorage.setItem("plano777",JSON.stringify(lista));
+localStorage.plano777=JSON.stringify(lista);
 
-
-document.getElementById("texto").value="";
-
+texto.value="";
 
 carregar();
 
@@ -224,10 +195,9 @@ carregar();
 
 function enviarFoto(){
 
-let arquivo=document.getElementById("foto").files[0];
+let arq=foto.files[0];
 
-
-if(!arquivo)return;
+if(!arq)return;
 
 
 let leitor=new FileReader();
@@ -235,75 +205,78 @@ let leitor=new FileReader();
 
 leitor.onload=function(){
 
-
-let lista=JSON.parse(localStorage.getItem("plano777")||"[]");
+let lista=JSON.parse(localStorage.plano777||"[]");
 
 
 lista.push({
-
 nome:usuarioAtual,
-
 texto:leitor.result,
-
 tipo:"foto"
-
 });
 
 
-localStorage.setItem("plano777",JSON.stringify(lista));
-
+localStorage.plano777=JSON.stringify(lista);
 
 carregar();
 
+}
 
-};
 
-
-leitor.readAsDataURL(arquivo);
+leitor.readAsDataURL(arq);
 
 }
+
 
 
 
 
 function carregar(){
 
-
-let caixa=document.getElementById("mensagens");
-
-
-caixa.innerHTML="";
+mensagens.innerHTML="";
 
 
-let lista=JSON.parse(localStorage.getItem("plano777")||"[]");
+let lista=JSON.parse(localStorage.plano777||"[]");
 
 
-lista.forEach(m=>{
+lista.forEach((m,i)=>{
 
 
 if(m.tipo=="foto"){
 
-
-caixa.innerHTML+=`
+mensagens.innerHTML+=`
 
 <div class="msg">
-<div class="nome">${m.nome}</div>
-<img src="${m.texto}">
-</div>
 
-`;
+<div class="nome">${m.nome}</div>
+
+<img src="${m.texto}">
+
+<br>
+
+<button onclick="deletar(${i})">
+Deletar
+</button>
+
+</div>`;
 
 }else{
 
 
-caixa.innerHTML+=`
+mensagens.innerHTML+=`
 
 <div class="msg">
-<div class="nome">${m.nome}</div>
-${m.texto}
-</div>
 
-`;
+<div class="nome">${m.nome}</div>
+
+${m.texto}
+
+<br>
+
+<button onclick="deletar(${i})">
+Deletar
+</button>
+
+</div>`;
 
 }
 
@@ -311,53 +284,77 @@ ${m.texto}
 });
 
 
-caixa.scrollTop=caixa.scrollHeight;
+}
 
+
+
+function deletar(i){
+
+if(confirm("Deletar mensagem?")){
+
+
+let lista=JSON.parse(localStorage.plano777||"[]");
+
+
+lista.splice(i,1);
+
+
+localStorage.plano777=JSON.stringify(lista);
+
+
+carregar();
 
 }
+
+}
+
+
+
+
+
+function apagar(){
+
+if(confirm("Apagar toda a conversa antiga?")){
+
+localStorage.removeItem("plano777");
+
+carregar();
+
+}
+
+}
+
 
 
 
 
 function baixar(){
 
-
-let confirmar=confirm("Deseja baixar a conversa do Plano777?");
-
-
-if(!confirmar)return;
+if(!confirm("Deseja baixar a conversa do Plano777?")) return;
 
 
-let lista=JSON.parse(localStorage.getItem("plano777")||"[]");
+let lista=JSON.parse(localStorage.plano777||"[]");
 
 
-let texto="Plano777 - 777ZAP\n\n";
+let textoArquivo="Plano777 - 777ZAP\n\n";
 
 
 lista.forEach(m=>{
 
+textoArquivo+=m.nome+": ";
 
-if(m.tipo=="texto"){
-
-texto+=m.nome+": "+m.texto+"\n";
-
-}else{
-
-texto+=m.nome+": [Foto]\n";
-
-}
-
+textoArquivo+=m.tipo=="foto"?"[Foto]\n":m.texto+"\n";
 
 });
 
 
-let arquivo=new Blob([texto],{type:"text/plain"});
+let blob=new Blob([textoArquivo],{type:"text/plain"});
 
 
 let link=document.createElement("a");
 
 
-link.href=URL.createObjectURL(arquivo);
+link.href=URL.createObjectURL(blob);
 
 
 link.download="Plano777.txt";
@@ -367,27 +364,6 @@ link.click();
 
 
 }
-
-
-
-
-function apagar(){
-
-
-let confirmar=confirm("Apagar toda a conversa antiga?");
-
-
-if(confirmar){
-
-localStorage.removeItem("plano777");
-
-carregar();
-
-}
-
-
-}
-
 
 </script>
 
